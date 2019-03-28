@@ -16,10 +16,9 @@ import org.zeroturnaround.zip.ZipEntryCallback
 import org.zeroturnaround.zip.ZipUtil
 import org.zeroturnaround.zip.transform.StringZipEntryTransformer
 import org.zeroturnaround.zip.transform.ZipEntryTransformerEntry
-import java.util.zip.ZipEntry
 import java.io.IOException
 import java.io.OutputStream
-import java.lang.IllegalStateException
+import java.util.zip.ZipEntry
 
 open class FiberPlugin : Plugin<Project> {
 
@@ -102,7 +101,8 @@ open class FiberPlugin : Plugin<Project> {
 
                 doLast {
 
-                    val extractSerializer = (String.serializer() to (String.serializer() to String.serializer()).map).map
+                    val extractSerializer =
+                        (String.serializer() to (String.serializer() to String.serializer()).map).map
                     val extractResult = json.parse(extractSerializer, standardOutput.toString())
                     logger.debug("extractResult: $extractResult")
 
@@ -119,14 +119,21 @@ open class FiberPlugin : Plugin<Project> {
                                     logger.lifecycle("parsed schema")
                                     logger.debug(schema.toString())
                                     val newSchema = schema.mapValues { (className, fields) ->
-                                        val extractedFields = extractResult.getValue(className)
-                                        fields.map { field ->
-                                            val original = schema.getValue(className).find { it.name == field.name }
-                                                ?: throw IllegalStateException("could not find field with name `${field.name}`")
-                                            original.copy(
-                                                value = extractedFields.getValue(original.name)
-                                            )
-                                        }
+                                        val extractedFields = extractResult[className]
+                                        if(extractedFields != null) {
+                                            fields.map { field ->
+                                                val original = schema.getValue(className).find { it.name == field.name }
+                                                    ?: throw IllegalStateException("could not find field with name `${field.name}`")
+                                                val value = extractedFields[original.name]
+                                                if (value != null)
+                                                    original.copy(
+                                                        value = value
+                                                    )
+                                                else
+                                                    original
+                                            }
+                                        } else fields
+
                                     }
 
                                     return json.stringify(mapSerializer, newSchema)

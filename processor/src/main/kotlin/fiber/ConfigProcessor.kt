@@ -190,10 +190,10 @@ class ConfigProcessor : AbstractProcessor() {
             return
         }
         // DO not add enums as types
-        if(typeElement.kind == ElementKind.ENUM) {
-            log("not processing enum types")
-            return
-        }
+//        if(typeElement.kind == ElementKind.ENUM) {
+//            log("not processing enum types")
+//            return
+//        }
         log(">>> processing $typeElement")
         val fields: MutableList<ConfigField> = mutableListOf()
 
@@ -259,7 +259,6 @@ class ConfigProcessor : AbstractProcessor() {
                     fields += ConfigField(
                         name = enclosedElement.simpleName.toString(),
                         type = fieldType,
-                        value = "",
                         comment = comment,
                         constraints = constraints
                     )

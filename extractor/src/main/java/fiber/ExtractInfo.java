@@ -11,18 +11,22 @@ public class ExtractInfo {
     public static void main(String[] args) {
         Gson gson = new Gson();
         Map<String, Map<String, String>> map = new HashMap<>();
-        for(String clazzName : args) {
+        for (String clazzName : args) {
             Map<String, String> fieldMap = new HashMap<>();
             try {
                 System.err.println(clazzName);
                 Class<?> objectClass = Class.forName(clazzName);
 
+                if (objectClass.isEnum()) {
+                    System.err.printf("skip enum class %s%n", objectClass.getName());
+                    continue;
+                }
                 Object instance = objectClass.newInstance();
                 Field[] fields = objectClass.getDeclaredFields();
-                for(Field field : fields) {
+                for (Field field : fields) {
                     Class<?> clazz = field.getType();
                     field.setAccessible(true);
-                    if(field.isAccessible()) {
+                    if (field.isAccessible()) {
                         Object value = field.get(instance);
                         String stringValue;
 //                        if(clazz.isArray()) {
@@ -56,7 +60,7 @@ public class ExtractInfo {
 //                        } else {
 //                            stringValue = value;
 //                        }
-                        if(!Arrays.asList(args).contains(clazz.getName())) {
+                        if (!Arrays.asList(args).contains(clazz.getName())) {
                             stringValue = gson.toJson(value);
                             fieldMap.put(field.getName(), stringValue);
                         } else {

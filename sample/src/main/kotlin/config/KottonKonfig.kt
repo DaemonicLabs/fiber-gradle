@@ -75,6 +75,6 @@ data class NestedConfig(
     val data: String = "defaultdata"
 )
 
-enum class State {
-    ONE, TWO, THREE
+enum class State(val number: Int) {
+    ONE(1), TWO(2), THREE(3)
 }
