@@ -8,8 +8,8 @@ plugins {
 }
 
 dependencies {
-    implementation(kotlin("stdlib", Kotlin.version))
-    implementation(project(":annotations"))
+    api(kotlin("stdlib", Kotlin.version))
+    api(project(":annotations"))
 
     logger.lifecycle(System.getenv("JAVA_HOME"))
     implementation(files("${System.getenv("JAVA_HOME")}/lib/tools.jar"))
@@ -17,7 +17,7 @@ dependencies {
     implementation("com.google.auto.service:auto-service:1.0-rc5")
     kapt("com.google.auto.service:auto-service:1.0-rc5")
 
-    implementation(
+    api(
         group = "org.jetbrains.kotlinx",
         name = "kotlinx-serialization-runtime",
         version = KotlinX.Serialization.version

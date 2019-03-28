@@ -31,14 +31,14 @@ public data class KottonKonfig(
     @Comment("nested config")
     var nested: NestedConfig = NestedConfig(),
 
-    @Comment("nested inner")
-    val nestedInner: NestedInner = NestedInner(),
+//    @Comment("nested inner")
+//    val nestedInner: NestedInner = NestedInner(),
 
     val nestedGenerics: MutableList<Map<String, ByteArray>> = mutableListOf()
 ) {
-    data class NestedInner(
-        val innerData: String = "defaultInner"
-    )
+//    data class NestedInner(
+//        val innerData: String = "defaultInner"
+//    )
 }
 
 data class ArrayConfig(

@@ -58,7 +58,7 @@ class ConfigProcessor : AbstractProcessor() {
         }
     }
 
-    val types: MutableMap<String, List<Field>> = mutableMapOf()
+    val types: MutableMap<String, List<ConfigField>> = mutableMapOf()
     fun processImpl(annotations: MutableSet<out TypeElement>, roundEnv: RoundEnvironment): Boolean {
 //        openLog()
         val generatedSourcesRoot: String = processingEnv.options[KAPT_KOTLIN_GENERATED_OPTION_NAME] ?: kotlin.run {
@@ -113,7 +113,7 @@ class ConfigProcessor : AbstractProcessor() {
 //            log("")
 //        }
 
-        val serializer: KSerializer<Field> = Field.serializer()
+        val serializer: KSerializer<ConfigField> = ConfigField.serializer()
         val mapSerializer = (String.serializer() to serializer.list).map
 
         val json = Json(
@@ -189,8 +189,13 @@ class ConfigProcessor : AbstractProcessor() {
             log("not processing builtin types")
             return
         }
+        // DO not add enums as types
+        if(typeElement.kind == ElementKind.ENUM) {
+            log("not processing enum types")
+            return
+        }
         log(">>> processing $typeElement")
-        val fields: MutableList<Field> = mutableListOf()
+        val fields: MutableList<ConfigField> = mutableListOf()
 
 //        val clazz = javaClass.classLoader.loadClass(typeElement.qualifiedName.toString())
 //        val instance = clazz.constructors[0].newInstance()
@@ -205,6 +210,7 @@ class ConfigProcessor : AbstractProcessor() {
         val floatType = processingEnv.elementUtils.getTypeElement("java.lang.Float").asType()
         val doubleType = processingEnv.elementUtils.getTypeElement("java.lang.Double").asType()
         val enumType = processingEnv.elementUtils.getTypeElement(Enum::class.java.canonicalName).asType()
+
 
         enclosedLoop@ for (enclosedElement in typeElement.enclosedElements) {
             when (enclosedElement.kind) {
@@ -250,9 +256,10 @@ class ConfigProcessor : AbstractProcessor() {
                     // comment
                     val comment = enclosedElement.getAnnotation(Comment::class.java)?.value
 
-                    fields += Field(
+                    fields += ConfigField(
                         name = enclosedElement.simpleName.toString(),
                         type = fieldType,
+                        value = "",
                         comment = comment,
                         constraints = constraints
                     )
@@ -399,7 +406,7 @@ class ConfigProcessor : AbstractProcessor() {
                                     }
                                 }
                             }
-                            constraints += Constraint("fabric:enum", enumValues)
+                            constraints += Constraint("fabric:enum", stringList = enumValues)
                         }
                         FieldType(type.toString())
                     }
@@ -460,12 +467,12 @@ class ConfigProcessor : AbstractProcessor() {
         val setValidator = element.getAnnotation(SetValidatorString::class.java)
             ?.takeIf { it.typeIndex.contains(typeIndex) }
             ?.let {
-                Constraint("fabric:string_set", it.values.toSet())
+                Constraint("fabric:string_set", stringList = it.values.toList())
             }
         val regexValidator = element.getAnnotation(RegexValidator::class.java)
             ?.takeIf { it.typeIndex.contains(typeIndex) }
             ?.let {
-                Constraint("fabric:regex", it.regex)
+                Constraint("fabric:regex", string = it.regex)
             }
         return listOfNotNull(setValidator, regexValidator)
     }

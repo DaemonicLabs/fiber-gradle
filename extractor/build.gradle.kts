@@ -1,7 +1,7 @@
 plugins {
     `java-library`
     `maven-publish`
-    kotlin("jvm")
+//    kotlin("jvm")
 }
 
 java {
@@ -13,7 +13,9 @@ repositories {
 }
 
 dependencies {
-    kotlin("stdlib", Kotlin.version)
+//    kotlin("stdlib", Kotlin.version)
+    // https://mvnrepository.com/artifact/com.google.code.gson/gson
+    api(group = "com.google.code.gson", name = "gson", version = "2.8.5")
 }
 
 val sourcesJar = tasks.create<Jar>("sourcesJar") {
